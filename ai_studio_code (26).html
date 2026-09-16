@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AI Video Creator - صانع الفيديو الذكي</title>
+  <!-- PWA Web App Manifest & Mobile App Capabilities -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#F43F5E">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AI Video">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #090B10;
+      --bg-surface: #12151F;
+      --bg-card: #181D2A;
+      --bg-card-glass: rgba(24, 29, 42, 0.82);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(244, 63, 94, 0.35);
+      --rose-primary: #F43F5E;
+      --rose-light: #FDA4AF;
+      --rose-gold: #FB7185;
+      --accent-glow: rgba(244, 63, 94, 0.35);
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --amber-star: #FBBF24;
+      --emerald-green: #10B981;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top App Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #F43F5E, #9F1239);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #FFFFFF;
+    }
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(90deg, #FFFFFF, #FDA4AF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-text span {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: -2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-icon {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover, .btn-icon:active {
+      border-color: var(--rose-primary);
+      background: rgba(244, 63, 94, 0.12);
+      color: var(--rose-light);
+    }
+    .btn-install {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.28), rgba(225, 29, 72, 0.38));
+      border: 1px solid var(--rose-primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 10px rgba(244, 63, 94, 0.3);
+      font-weight: 700;
+      position: relative;
+    }
+    .btn-install:hover, .btn-install:active {
+      background: linear-gradient(135deg, #F43F5E, #E11D48);
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .btn-install svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+    .btn-install.pulse-glow {
+      animation: installPulse 2s infinite ease-in-out;
+    }
+    @keyframes installPulse {
+      0%, 100% {
+        box-shadow: 0 2px 10px rgba(244, 63, 94, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 18px rgba(244, 63, 94, 0.7);
+        border-color: #FDA4AF;
+      }
+    }
+    .btn-download-pkg {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #F8FAFC;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+    }
+    .btn-download-pkg:hover, .btn-download-pkg:active {
+      border-color: var(--rose-primary);
+      color: #FFFFFF;
+      background: rgba(244, 63, 94, 0.2);
+      box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-download-pkg svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+    .download-card-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--bg-card);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
+    }
+    .download-card-option:hover {
+      border-color: var(--rose-primary);
+      background: rgba(244, 63, 94, 0.06);
+    }
+    .download-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, #F43F5E, #E11D48);
+      color: #FFFFFF !important;
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(244, 63, 94, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .download-link-btn:hover, .download-link-btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(244, 63, 94, 0.55);
+    }
+    .download-link-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* Video Player Viewport */
+    .player-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      position: relative;
+    }
+    .player-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(18, 21, 31, 0.8);
+      backdrop-filter: blur(10px);
+    }
+    .aspect-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-card);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+    }
+    .aspect-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .aspect-btn.active {
+      background: var(--rose-primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .player-viewport-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #050608;
+      padding: 8px 0;
+    }
+    .player-viewport {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 9 / 16;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: #000000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      transition: aspect-ratio 0.3s ease, max-width 0.3s ease;
+    }
+    .player-viewport.widescreen {
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+    }
+
+    /* Dual Crossfading Video Layers for Smooth Cinematic Cuts */
+    .scene-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .scene-layer.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    /* Dynamic Ken Burns Motion Keyframes */
+    @keyframes kenBurnsZoomIn {
+      0% {
+        transform: scale(1.04) translate(0%, 0%);
+      }
+      50% {
+        transform: scale(1.16) translate(-1.5%, -1%);
+      }
+      100% {
+        transform: scale(1.26) translate(-2.5%, -2%);
+      }
+    }
+
+    @keyframes kenBurnsZoomOut {
+      0% {
+        transform: scale(1.26) translate(2%, 2%);
+      }
+      50% {
+        transform: scale(1.15) translate(1%, 0.5%);
+      }
+      100% {
+        transform: scale(1.05) translate(0%, 0%);
+      }
+    }
+
+    @keyframes kenBurnsPanRight {
+      0% {
+        transform: scale(1.18) translate(-3%, 1%);
+      }
+      100% {
+        transform: scale(1.22) translate(3%, -1.5%);
+      }
+    }
+
+    @keyframes kenBurnsPanLeft {
+      0% {
+        transform: scale(1.20) translate(3%, -1%);
+      }
+      100% {
+        transform: scale(1.16) translate(-3%, 2%);
+      }
+    }
+
+    .scene-bg-img {
+      position: absolute;
+      inset: -10%;
+      width: 120%;
+      height: 120%;
+      object-fit: cover;
+      transform-origin: center center;
+      will-change: transform;
+      animation-duration: 7s;
+      animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      animation-play-state: paused;
+    }
+
+    /* Animation variants assigned per scene */
+    .motion-zoom-in {
+      animation-name: kenBurnsZoomIn;
+    }
+    .motion-zoom-out {
+      animation-name: kenBurnsZoomOut;
+    }
+    .motion-pan-right {
+      animation-name: kenBurnsPanRight;
+    }
+    .motion-pan-left {
+      animation-name: kenBurnsPanLeft;
+    }
+
+    /* When playback is running, activate Ken Burns continuously */
+    .player-viewport.playing .scene-bg-img {
+      animation-play-state: running;
+    }
+
+    /* Cinematic Overlays (Vignette & Gradient for High Text Contrast) */
+    .viewport-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.15) 20%, rgba(0,0,0,0.82) 90%),
+                  linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Top Badges in Viewport */
+    .viewport-top-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+    .scene-tag-badge {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scene-tag-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--rose-primary);
+      box-shadow: 0 0 10px var(--rose-primary);
+      animation: pulseDot 1.5s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+    .visual-tag-indicator {
+      background: rgba(244, 63, 94, 0.25);
+      border: 1px solid var(--border-accent);
+      color: var(--rose-light);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* True Dynamic Kinetic Subtitles Overlay (TikTok / Reels Style) */
+    .kinetic-caption-container {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 22%;
+      z-index: 6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      min-height: 80px;
+    }
+    .kinetic-phrase-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px 8px;
+      max-width: 96%;
+      text-align: center;
+    }
+
+    @keyframes wordPop {
+      0% {
+        transform: scale(0.92);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.22);
+      }
+      100% {
+        transform: scale(1.15);
+      }
+    }
+
+    .caption-word {
+      display: inline-block;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.75);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
+      padding: 3px 8px;
+      border-radius: 8px;
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .caption-word.highlight {
+      color: #FFFFFF;
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.92), rgba(225, 29, 72, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      font-weight: 900;
+      transform: scale(1.18) translateY(-2px);
+      box-shadow: 0 0 20px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      animation: wordPop 0.22s ease-out;
+      z-index: 2;
+    }
+
+    .caption-word.spoken {
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Player Controls Bar */
+    .player-controls {
+      padding: 12px 14px;
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-card);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #F43F5E, #FDA4AF);
+      border-radius: 3px;
+      position: relative;
+      transition: width 0.1s linear;
+    }
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 0 6px var(--rose-primary);
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .time-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .main-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ctrl-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover, .ctrl-btn:active {
+      background: rgba(244, 63, 94, 0.2);
+      border-color: var(--rose-primary);
+    }
+    .ctrl-btn.play-btn {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #F43F5E, #BE123C);
+      border: none;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .ctrl-btn.play-btn:active {
+      transform: scale(0.95);
+    }
+    .ctrl-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+    .ctrl-btn.play-btn svg {
+      fill: #FFFFFF;
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Scene Timeline Ribbon */
+    .scene-ribbon-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .scene-ribbon {
+      display: flex;
+      gap: 10px;
+      padding: 0 14px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .scene-ribbon::-webkit-scrollbar {
+      display: none;
+    }
+    .scene-ribbon-item {
+      flex: 0 0 110px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .scene-ribbon-item.active {
+      border-color: var(--rose-primary);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+    .ribbon-img {
+      width: 100%;
+      height: 54px;
+      object-fit: cover;
+    }
+    .ribbon-info {
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ribbon-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ribbon-tag {
+      font-size: 0.62rem;
+      color: var(--rose-gold);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Studio Input Card */
+    .studio-card {
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--rose-primary);
+    }
+
+    /* Quick Preset Chips */
+    .preset-chips-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .preset-chips-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .preset-chip {
+      flex: 0 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-lg);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover, .preset-chip:active {
+      border-color: var(--rose-primary);
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--rose-light);
+    }
+
+    /* Script Input Field */
+    .script-input-wrap {
+      position: relative;
+    }
+    .script-textarea {
+      width: 100%;
+      min-height: 110px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+      line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    .script-textarea:focus {
+      outline: none;
+      border-color: var(--rose-primary);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .script-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Action Buttons */
+    .studio-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.88rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-ai {
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      color: var(--rose-light);
+    }
+    .btn-ai:hover, .btn-ai:active {
+      background: rgba(244, 63, 94, 0.2);
+    }
+    .btn-create {
+      background: linear-gradient(135deg, #F43F5E, #BE123C);
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .btn-create:active {
+      transform: scale(0.98);
+    }
+
+    /* Status Alert */
+    .status-alert {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: #6EE7B7;
+    }
+    .status-alert svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-xl);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .modal-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      color: #FFFFFF;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Top App Bar -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1 id="appTitle">صانع الفيديو الذكي</h1>
+        <span id="appSubtitle">AI Video Creator • المحتوى المنسق</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn-icon btn-download-pkg" id="btnDownloadPkg" title="تحميل التطبيق والحزمة مباشرة">
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span id="downloadBtnText">تحميل الحزمة</span>
+      </button>
+      <button class="btn-icon btn-install pulse-glow" id="btnInstallApp" title="تثبيت التطبيق على الشاشة الرئيسية">
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        <span id="installBtnText">تثبيت التطبيق</span>
+      </button>
+      <button class="btn-icon" id="btnLangToggle" title="تغيير اللغة">
+        <span>🌐</span> <span id="langLabel">English</span>
+      </button>
+      <button class="btn-icon" id="btnApiKey" title="مفتاح Gemini API">
+        <span>🔑</span> <span>API</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Video Player Card -->
+  <section class="player-card">
+    <div class="player-header">
+      <div class="aspect-toggle">
+        <button class="aspect-btn active" id="btnVertical">9:16 تيك توك</button>
+        <button class="aspect-btn" id="btnWidescreen">16:9 شاشة عريضة</button>
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;" id="sceneCounter">
+        المشهد 1 / 3
+      </div>
+    </div>
+
+    <!-- Active Scene Viewport -->
+    <div class="player-viewport-wrap">
+      <div class="player-viewport" id="videoViewport">
+        
+        <!-- Crossfading Background Layers for Continuous Ken Burns Motion -->
+        <div class="scene-layer active" id="layerA">
+          <img src="" alt="Scene Background A" class="scene-bg-img motion-zoom-in" id="sceneImageA">
+        </div>
+        <div class="scene-layer" id="layerB">
+          <img src="" alt="Scene Background B" class="scene-bg-img motion-pan-right" id="sceneImageB">
+        </div>
+        
+        <div class="viewport-overlay"></div>
+
+        <!-- Top Badges -->
+        <div class="viewport-top-badge">
+          <div class="scene-tag-badge">
+            <span class="dot"></span>
+            <span id="sceneTitleBadge">المقدمة والافتتاحية</span>
+          </div>
+          <span class="visual-tag-indicator" id="visualTagBadge">LENTILS_GRAINS</span>
+        </div>
+
+        <!-- True Dynamic Kinetic Subtitles (Word-by-word Glowing Highlights) -->
+        <div class="kinetic-caption-container">
+          <div class="kinetic-phrase-wrap" id="kineticCaptionBox">
+            <!-- Dynamic word elements injected via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player Controls & Timeline -->
+    <div class="player-controls">
+      <div class="progress-bar-wrap" id="progressBarWrap">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+
+      <div class="controls-row">
+        <span class="time-label" id="timeCurrent">00:00</span>
+        <div class="main-controls">
+          <button class="ctrl-btn" id="btnPrevScene" title="المشهد السابق">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="ctrl-btn play-btn" id="btnPlayPause" title="تشغيل / إيقاف">
+            <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btnNextScene" title="المشهد التالي">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btnMuteToggle" title="كتم / تشغيل الصوت">
+            <svg viewBox="0 0 24 24" id="soundIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+          </button>
+        </div>
+        <span class="time-label" id="timeTotal">00:18</span>
+      </div>
+    </div>
+
+    <!-- Scenes Ribbon Thumbnails -->
+    <div class="scene-ribbon-title">
+      <span id="ribbonHeaderTitle">مشاهد الفيديو المتطابقة:</span>
+      <span style="font-size:0.7rem; color:var(--emerald-green);">✓ مطابقة سياقية 100% (بدون صور عشوائية)</span>
+    </div>
+    <div class="scene-ribbon" id="sceneRibbon">
+      <!-- Generated scene cards injected here -->
+    </div>
+  </section>
+
+  <!-- Contextual Visual Match Notification -->
+  <div class="status-alert">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <div id="statusAlertText">
+      <strong>محرك الفيديو الحركي نشط:</strong> تأثيرات حركة سينمائية Ken Burns، وترجمات نصية مضيئة متزامنة كلمة بكلمة، وصور عالية الدقة مطابقة بدقة لموضوع النص!
+    </div>
+  </div>
+
+  <!-- Script & Storyboard Studio Card -->
+  <section class="studio-card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        <span id="studioTitle">محرر النص والمشاهد</span>
+      </div>
+      <button class="btn-icon" id="btnClearScript" style="padding:4px 8px; font-size:0.75rem;">مسح</button>
+    </div>
+
+    <!-- Quick Preset Chips -->
+    <div class="preset-chips-scroll">
+      <button class="preset-chip" data-topic="شوربة العدس والبقوليات">🥣 شوربة العدس</button>
+      <button class="preset-chip" data-topic="فوائد التفاح والفاكهة الصحية">🍎 التفاح والفاكهة</button>
+      <button class="preset-chip" data-topic="اللياقة البدنية وملاعب الرياضة">⚽ رياضة وملاعب</button>
+      <button class="preset-chip" data-topic="ثورة الذكاء الاصطناعي والروبوتات">🤖 ذكاء اصطناعي</button>
+      <button class="preset-chip" data-topic="سباق السيارات الخارقة والسرعة">🏎️ سيارات خارقة</button>
+      <button class="preset-chip" data-topic="فن صناعة قهوة الإسبريسو">☕ قهوة الصباح</button>
+      <button class="preset-chip" data-topic="إدارة الثروة والاستثمار المالي">📈 مال واستثمار</button>
+    </div>
+
+    <!-- Script Input -->
+    <div class="script-input-wrap">
+      <textarea class="script-textarea" id="scriptInput" placeholder="اكتب موضوع الفيديو أو النص هنا... مثلاً: 'شوربة العدس المغذية وفوائدها الصحية للصحة والطاقة'"></textarea>
+      <div class="script-meta-row">
+        <span id="wordCountLabel">0 كلمة • مدة تقديرية 0 ثانية</span>
+        <button id="btnToggleDir" style="background:none; border:none; color:var(--rose-light); font-size:0.75rem; cursor:pointer;">محاذاة النص ⇄</button>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="studio-actions">
+      <button class="btn-action btn-ai" id="btnAiGenerate">
+        <span>✨</span> <span id="btnAiText">توليد بالذكاء الاصطناعي</span>
+      </button>
+      <button class="btn-action btn-create" id="btnCreateVideo">
+        <span>🎬</span> <span id="btnCreateText">تحديث الفيديو والمشاهد</span>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- API Key Modal -->
+<div class="modal-overlay" id="apiKeyModal">
+  <div class="modal-card">
+    <h3 style="font-size:1.1rem; color:#FFFFFF;">إعداد مفتاح Gemini API</h3>
+    <p style="font-size:0.85rem; color:var(--text-secondary);">
+      أدخل مفتاحك للاستفادة من توليد نصوص ونماذج سيناريو بالذكاء الاصطناعي السحابي، أو اتركه فارغاً لاستخدام المحرك المحلي الفوري!
+    </p>
+    <input type="password" class="modal-input" id="apiKeyInput" placeholder="AIzaSy...">
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn-icon" id="btnCloseModal">إلغاء</button>
+      <button class="btn-action btn-create" id="btnSaveApiKey" style="padding:8px 16px;">حفظ المفتاح</button>
+    </div>
+  </div>
+</div>
+
+<!-- Install PWA Modal -->
+<div class="modal-overlay" id="installModal">
+  <div class="modal-card">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="brand-icon" style="width:44px; height:44px; flex-shrink:0;">
+        <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+      </div>
+      <div>
+        <h3 style="font-size:1.05rem; color:#FFFFFF;" id="installModalTitle">تثبيت التطبيق على هاتفك</h3>
+        <span style="font-size:0.75rem; color:var(--rose-light);">تجربة تطبيق أصلي ومستقل بدون شريط المتصفح</span>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+      <div id="standardInstallTip" style="display:flex; gap:10px; align-items:center; background:var(--bg-card); padding:10px 12px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+        <span style="font-size:1.3rem;">📲</span>
+        <div>
+          <strong style="color:var(--text-primary); display:block;" id="tipTitle">تثبيت فوري على الشاشة الرئيسية:</strong>
+          <span id="tipDesc">انقر على زر "تثبيت الآن" لإضافة التطبيق كبرنامج مستقل يعمل بسلاسة وسرعة فائقة.</span>
+        </div>
+      </div>
+
+      <div id="iosInstallGuide" style="display:none; flex-direction:column; gap:8px; background:rgba(244,63,94,0.08); padding:12px; border-radius:var(--radius-md); border:1px solid rgba(244,63,94,0.3);">
+        <strong style="color:#FDA4AF; display:block;" id="iosTitle">تعليمات أجهزة iPhone / iPad (Safari):</strong>
+        <div id="iosStep1">1. اضغط على زر المشاركة <strong>(Share / ⎋)</strong> في أسفل أو أعلى شاشة المتصفح.</div>
+        <div id="iosStep2">2. مرر القائمة للأسفل واختر <strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</strong>.</div>
+        <div id="iosStep3">3. اضغط على <strong>"إضافة" (Add)</strong> في أعلى اليمين.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:6px;">
+      <button class="btn-icon" id="btnCloseInstallModal">إلغاء</button>
+      <button class="btn-action btn-create" id="btnConfirmNativeInstall" style="padding:8px 16px;">
+        <span id="btnConfirmNativeText">تثبيت الآن</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Direct Download Modal -->
+<div class="modal-overlay" id="downloadModal">
+  <div class="modal-card" style="max-width: 520px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="brand-icon" style="width:44px; height:44px; flex-shrink:0; background:linear-gradient(135deg, #10B981, #059669);">
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      </div>
+      <div>
+        <h3 style="font-size:1.05rem; color:#FFFFFF;" id="dlModalTitle">تحميل التطبيق مباشرة لجهازك</h3>
+        <span style="font-size:0.75rem; color:var(--text-secondary);" id="dlModalSubtitle">تنزيل مباشر بنقرة واحدة بدون الاعتماد على نافذة المعاينة</span>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+      <!-- Option 1: Standalone Single-File HTML -->
+      <div class="download-card-option">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">📄</span>
+            <strong style="color:var(--text-primary); font-size:0.9rem;" id="dlSingleHtmlTitle">حزمة ملف HTML الموحد المستقل</strong>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:3px;" id="dlSingleHtmlDesc">
+            ملف واحد مجمع (66 KB) يعمل في أي متصفح هاتف أو كمبيوتر بدون إنترنت.
+          </div>
+        </div>
+        <a href="/downloads/ai-video-creator-standalone.html?download=1" download="ai-video-creator-standalone.html" class="download-link-btn" id="dlSingleHtmlBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span id="dlSingleHtmlBtnText">تحميل HTML</span>
+        </a>
+      </div>
+
+      <!-- Option 2: Full Web App ZIP Archive -->
+      <div class="download-card-option">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">📦</span>
+            <strong style="color:var(--text-primary); font-size:0.9rem;" id="dlZipTitle">حزمة تطبيق الويب الكاملة (ZIP)</strong>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:3px;" id="dlZipDesc">
+            أرشيف مضغوط (27 KB) يضم كود المصدر، أيقونات PWA وتطبيق الويب التقدمي كاملاً.
+          </div>
+        </div>
+        <a href="/downloads/ai-video-creator-web-app.zip" download="ai-video-creator-web-app.zip" class="download-link-btn" style="background:linear-gradient(135deg, #0284C7, #0369A1);" id="dlZipBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span id="dlZipBtnText">تحميل ZIP</span>
+        </a>
+      </div>
+
+      <!-- Option 3: Native Android APK -->
+      <div class="download-card-option">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">🤖</span>
+            <strong style="color:var(--text-primary); font-size:0.9rem;" id="dlApkTitle">تطبيق أندرويد المستقل (APK)</strong>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:3px;" id="dlApkDesc">
+            ملف APK أصلي مترجم (26 MB) جاهز للتثبيت والاستخدام المباشر على الهاتف.
+          </div>
+        </div>
+        <a href="/downloads/ai-video-creator.apk" download="ai-video-creator.apk" class="download-link-btn" style="background:linear-gradient(135deg, #10B981, #047857);" id="dlApkBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span id="dlApkBtnText">تحميل APK</span>
+        </a>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+      <button class="btn-icon" id="btnCloseDownloadModal">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * Priority-Weighted Contextual Keyword-to-Image Map
+ * Specific nouns (Apples, Lentils, Sports) have high priority (weight 25)
+ * so broad terms like "صحة" or "غذاء" never override specific entities!
+ * Zero desert or mismatched travel landscapes.
+ */
+const KEYWORD_IMAGE_MAP = [
+  // 1. APPLES & SPECIFIC FRUITS (Highest Priority - Never shows generic salad)
+  {
+    priority: 30,
+    tag: "APPLES_FRUIT",
+    keywords: ["تفاح", "تفاحة", "تفاحا", "تفاحاً", "تفاحه", "فواكه", "فاكهة", "فواكة", "ثمار", "بستان", "apple", "apples", "fruit", "fruits", "orchard"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=1080&q=80", // Crisp red apples
+      "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?auto=format&fit=crop&w=1080&q=80", // Orchard apple harvest basket
+      "https://images.unsplash.com/photo-1579613832125-5d34a13ffe0a?auto=format&fit=crop&w=1080&q=80", // Fresh vibrant honeycrisp apples
+      "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=1080&q=80"  // Fresh crisp apples on wood
+    ]
+  },
+  // 2. LENTILS, SOUP, LEGUMES & GRAINS (High Priority)
+  {
+    priority: 30,
+    tag: "LENTILS_GRAINS",
+    keywords: ["عدس", "عدسا", "عدساً", "شوربة عدس", "شوربة", "شوربه", "حساء", "حبوب", "بقوليات", "بقول", "فول", "حمص", "lentil", "lentils", "legume", "legumes", "grains", "soup", "chickpeas", "broth"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1080&q=80", // Raw lentils & legumes bowls
+      "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1080&q=80", // Steaming hot lentil soup
+      "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=1080&q=80", // Vegetable and lentil soup pot
+      "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=1080&q=80"  // Steaming culinary soup bowl
+    ]
+  },
+  // 3. SPORTS, STADIUM, BALL & FITNESS (High Priority)
+  {
+    priority: 28,
+    tag: "SPORTS_STADIUM",
+    keywords: ["رياضة", "رياضي", "رياضيه", "كرة", "كره", "ملعب", "ملاعب", "مباراة", "مباراه", "عضلات", "تمارين", "جيم", "حديد", "لياقة", "لياقه", "تدريب", "sport", "sports", "stadium", "ball", "soccer", "football", "fitness", "workout", "gym", "match", "athlete"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1080&q=80", // Night illuminated stadium arena
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1080&q=80", // Athletic fitness gym training
+      "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=1080&q=80", // Workout dumbbells and weights
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1080&q=80"  // Soccer stadium under lights
+    ]
+  },
+  // 4. SUPERCAR, RACING & AUTOMOTIVE (High Priority)
+  {
+    priority: 28,
+    tag: "SUPERCAR_SPEED",
+    keywords: ["سيار", "سيارة", "سيارات", "سرعة", "محرك", "سباق", "مركبة", "فيراري", "بورش", "لامبورجيني", "car", "cars", "supercar", "speed", "automotive", "racing", "vehicle", "engine"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1080&q=80", // Sleek modern supercar
+      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1080&q=80", // High performance sports vehicle
+      "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1080&q=80"  // Racing speed automobile
+    ]
+  },
+  // 5. ARTISAN COFFEE & BARISTA (High Priority)
+  {
+    priority: 28,
+    tag: "ARTISAN_COFFEE",
+    keywords: ["قهوة", "قهوه", "مقهى", "كافيه", "باريستا", "إسبريسو", "اسبريسو", "بن", "لاتيه", "coffee", "cafe", "barista", "espresso", "latte", "beans"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1080&q=80", // Roasted beans and espresso cup
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1080&q=80", // Barista latte art
+      "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1080&q=80"  // Steaming fresh espresso
+    ]
+  },
+  // 6. TECH, AI & ROBOTICS (High Priority)
+  {
+    priority: 28,
+    tag: "TECH_AI",
+    keywords: ["تقنية", "تكنولوجيا", "ذكاء", "روبوت", "روبوتات", "برمجة", "كود", "حاسوب", "شريحة", "رقمي", "سحابي", "ai", "tech", "technology", "robot", "robotics", "code", "cyber", "software", "digital"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1080&q=80", // Futuristic humanoid AI robot
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1080&q=80", // Cyber circuitry and chips
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1080&q=80"  // Cyber coding neural network
+    ]
+  },
+  // 7. BUSINESS, FINANCE & INVESTMENT (Medium Priority)
+  {
+    priority: 20,
+    tag: "BUSINESS_WEALTH",
+    keywords: ["مال", "استثمار", "ثروة", "ثروه", "أعمال", "اعمال", "تجارة", "تجاره", "تسويق", "بورصة", "بورصه", "سهم", "أسهم", "شركة", "شركه", "business", "finance", "investment", "market", "money", "stock", "corporate"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1080&q=80", // Modern corporate glass highrise
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=80", // Executive business presentation
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1080&q=80"  // Business analytics dashboard
+    ]
+  },
+  // 8. GENERAL FOOD & DIET (Low Priority - Only matches when no specific fruit or dish is mentioned)
+  {
+    priority: 5,
+    tag: "FOOD_NUTRITION",
+    keywords: ["طعام", "أكل", "اكل", "وجبة", "وجبه", "شيف", "مطعم", "طهي", "طبخ", "مطبخ", "سلطة", "سلطه", "غذاء", "تغذية", "تغذيه", "food", "nutrition", "meal", "diet", "dish", "culinary", "chef"],
+    imageUrls: [
+      "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1080&q=80", // Nutrient superfood bowl
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1080&q=80", // Gourmet culinary dining
+      "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1080&q=80"  // Balanced food spread
+    ]
+  }
+];
+
+// Clean abstract geometric studio backgrounds (NEVER desert or sand rocks)
+const NEUTRAL_STUDIO_FALLBACKS = [
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&q=80",
+  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1080&q=80",
+  "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1080&q=80"
+];
+
+const MOTION_VARIANTS = [
+  "motion-zoom-in",
+  "motion-pan-right",
+  "motion-zoom-out",
+  "motion-pan-left"
+];
+
+/**
+ * Weighted Keyword Visual Resolver
+ * Calculates a match score based on priority and keyword specificity.
+ */
+function resolveVisual(text, sceneIndex) {
+  const lower = (text || "").toLowerCase();
+  let bestMatch = null;
+  let highestScore = 0;
+
+  for (const entry of KEYWORD_IMAGE_MAP) {
+    let score = 0;
+    for (const kw of entry.keywords) {
+      if (lower.includes(kw.toLowerCase())) {
+        score += entry.priority * (kw.length >= 4 ? 2 : 1);
+      }
+    }
+    if (score > highestScore) {
+      highestScore = score;
+      bestMatch = entry;
+    }
+  }
+
+  if (bestMatch && highestScore > 0) {
+    const url = bestMatch.imageUrls[sceneIndex % bestMatch.imageUrls.length];
+    return {
+      imageUrl: url,
+      tag: `${bestMatch.tag}_0${sceneIndex + 1}`
+    };
+  }
+
+  // Safe fallback to modern dark studio geometry (Zero desert photos)
+  return {
+    imageUrl: NEUTRAL_STUDIO_FALLBACKS[sceneIndex % NEUTRAL_STUDIO_FALLBACKS.length],
+    tag: `STUDIO_ABSTRACT_0${sceneIndex + 1}`
+  };
+}
+
+// Clean meta labels like 'المشهد 1:', 'Scene 1:'
+function cleanScriptChunk(text) {
+  return text
+    .replace(/(?:المشهد\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+)|Scene\s*\d+)[\s:：\-–—]*/gi, '')
+    .replace(/^\s*[-*•]\s*/gm, '')
+    .trim();
+}
+
+/** State */
+let isArabic = true;
+let currentSceneIndex = 0;
+let isPlaying = false;
+let isMuted = false;
+let playbackSeconds = 0;
+let playbackTimer = null;
+let userApiKey = localStorage.getItem("gemini_api_key") || "";
+let activeLayer = "A"; // "A" or "B" for crossfading
+
+let scenes = [
+  {
+    title: "شوربة العدس المغذية",
+    text: "تعتبر شوربة العدس الدافئة من أروع الأغذية الطبيعية الغنية بالبروتين النباتي والألياف والمعادن.",
+    duration: 5,
+    imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1080&q=80",
+    visualTag: "LENTILS_GRAINS_01",
+    motionClass: "motion-zoom-in"
+  },
+  {
+    title: "فوائد صحية للجسم",
+    text: "تمنحك الحبوب والبقوليات طاقة مستدامة، وتقوي المناعة وتدعم صحة القلب والشرايين بشكل مثالي.",
+    duration: 5,
+    imageUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1080&q=80",
+    visualTag: "LENTILS_GRAINS_02",
+    motionClass: "motion-pan-right"
+  },
+  {
+    title: "نصيحة التغذية اليومية",
+    text: "اجعل طبق الحساء الصحي جزءاً من وجباتك اليومية لتحافظ على نشاطك وصحتك طوال اليوم!",
+    duration: 5,
+    imageUrl: "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=1080&q=80",
+    visualTag: "LENTILS_GRAINS_03",
+    motionClass: "motion-zoom-out"
+  }
+];
+
+/** Elements */
+const videoViewport = document.getElementById("videoViewport");
+const layerA = document.getElementById("layerA");
+const layerB = document.getElementById("layerB");
+const sceneImageA = document.getElementById("sceneImageA");
+const sceneImageB = document.getElementById("sceneImageB");
+const sceneTitleBadge = document.getElementById("sceneTitleBadge");
+const visualTagBadge = document.getElementById("visualTagBadge");
+const kineticCaptionBox = document.getElementById("kineticCaptionBox");
+const progressBarFill = document.getElementById("progressBarFill");
+const progressBarWrap = document.getElementById("progressBarWrap");
+const timeCurrent = document.getElementById("timeCurrent");
+const timeTotal = document.getElementById("timeTotal");
+const sceneCounter = document.getElementById("sceneCounter");
+const sceneRibbon = document.getElementById("sceneRibbon");
+const scriptInput = document.getElementById("scriptInput");
+const wordCountLabel = document.getElementById("wordCountLabel");
+
+const btnPlayPause = document.getElementById("btnPlayPause");
+const playIcon = document.getElementById("playIcon");
+const btnPrevScene = document.getElementById("btnPrevScene");
+const btnNextScene = document.getElementById("btnNextScene");
+const btnMuteToggle = document.getElementById("btnMuteToggle");
+const soundIcon = document.getElementById("soundIcon");
+const btnVertical = document.getElementById("btnVertical");
+const btnWidescreen = document.getElementById("btnWidescreen");
+const btnLangToggle = document.getElementById("btnLangToggle");
+const btnApiKey = document.getElementById("btnApiKey");
+const apiKeyModal = document.getElementById("apiKeyModal");
+const apiKeyInput = document.getElementById("apiKeyInput");
+const btnSaveApiKey = document.getElementById("btnSaveApiKey");
+const btnCloseModal = document.getElementById("btnCloseModal");
+const btnClearScript = document.getElementById("btnClearScript");
+const btnToggleDir = document.getElementById("btnToggleDir");
+const btnAiGenerate = document.getElementById("btnAiGenerate");
+const btnCreateVideo = document.getElementById("btnCreateVideo");
+
+/** Initialize */
+function init() {
+  scriptInput.value = "تعتبر شوربة العدس الدافئة من أروع الأغذية الطبيعية الغنية بالبروتين النباتي والألياف.\nتمنحك الحبوب والبقوليات طاقة مستدامة وتقوي المناعة وتدعم صحة القلب.\nاجعل طبق الحساء الصحي جزءاً من وجباتك اليومية لتحافظ على نشاطك وصحتك!";
+  updateWordCount();
+  renderScenes();
+  loadScene(0, false);
+  bindEvents();
+}
+
+function getTotalDuration() {
+  return scenes.reduce((sum, s) => sum + s.duration, 0);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Crossfade scene with seamless Ken Burns Motion
+ */
+function loadScene(index, crossfade = true) {
+  if (index < 0 || index >= scenes.length) return;
+  currentSceneIndex = index;
+  const s = scenes[index];
+
+  // Badges
+  sceneTitleBadge.textContent = s.title;
+  visualTagBadge.textContent = s.visualTag;
+  sceneCounter.textContent = isArabic ? `المشهد ${index + 1} / ${scenes.length}` : `Scene ${index + 1} / ${scenes.length}`;
+
+  const motionClass = s.motionClass || MOTION_VARIANTS[index % MOTION_VARIANTS.length];
+
+  if (crossfade) {
+    if (activeLayer === "A") {
+      // Switch to B
+      sceneImageB.className = `scene-bg-img ${motionClass}`;
+      sceneImageB.src = s.imageUrl;
+      layerB.classList.add("active");
+      layerA.classList.remove("active");
+      activeLayer = "B";
+    } else {
+      // Switch to A
+      sceneImageA.className = `scene-bg-img ${motionClass}`;
+      sceneImageA.src = s.imageUrl;
+      layerA.classList.add("active");
+      layerB.classList.remove("active");
+      activeLayer = "A";
+    }
+  } else {
+    // Initial direct setup
+    sceneImageA.className = `scene-bg-img ${motionClass}`;
+    sceneImageA.src = s.imageUrl;
+    layerA.classList.add("active");
+    layerB.classList.remove("active");
+    activeLayer = "A";
+  }
+
+  // Setup words for dynamic glowing subtitles
+  renderCaptionWords(s.text);
+
+  // Update Ribbon active state
+  document.querySelectorAll(".scene-ribbon-item").forEach((item, idx) => {
+    item.classList.toggle("active", idx === index);
+  });
+}
+
+function renderCaptionWords(text) {
+  kineticCaptionBox.innerHTML = "";
+  const words = text.split(/\s+/).filter(w => w.trim().length > 0);
+  words.forEach((w, idx) => {
+    const span = document.createElement("span");
+    span.className = "caption-word";
+    span.id = `caption-word-${idx}`;
+    span.textContent = w;
+    kineticCaptionBox.appendChild(span);
+  });
+}
+
+/**
+ * Kinetic highlight engine:
+ * Dynamically illuminates and scales the exact spoken word with radiant glow.
+ */
+function updateKineticHighlight(sceneProgress) {
+  const words = kineticCaptionBox.querySelectorAll(".caption-word");
+  if (words.length === 0) return;
+
+  if (sceneProgress < 0 || !isPlaying) {
+    words.forEach(span => {
+      span.classList.remove("highlight", "spoken");
+    });
+    return;
+  }
+
+  const activeWordIdx = Math.min(words.length - 1, Math.floor(sceneProgress * words.length));
+
+  words.forEach((span, idx) => {
+    const isCurrent = idx === activeWordIdx;
+    const isPast = idx < activeWordIdx;
+    span.classList.toggle("highlight", isCurrent);
+    span.classList.toggle("spoken", isPast);
+  });
+}
+
+function renderScenes() {
+  sceneRibbon.innerHTML = "";
+  scenes.forEach((s, idx) => {
+    const card = document.createElement("div");
+    card.className = `scene-ribbon-item ${idx === currentSceneIndex ? 'active' : ''}`;
+    card.innerHTML = `
+      <img src="${s.imageUrl}" alt="${s.title}" class="ribbon-img">
+      <div class="ribbon-info">
+        <span class="ribbon-title">${s.title}</span>
+        <span class="ribbon-tag">• ${s.visualTag.split('_')[0]}</span>
+      </div>
+    `;
+    card.onclick = () => {
+      calculateTimeForScene(idx);
+      loadScene(idx, true);
+    };
+    sceneRibbon.appendChild(card);
+  });
+  timeTotal.textContent = formatTime(getTotalDuration());
+}
+
+function calculateTimeForScene(idx) {
+  let time = 0;
+  for (let i = 0; i < idx; i++) {
+    time += scenes[i].duration;
+  }
+  playbackSeconds = time;
+  updateProgressUI();
+}
+
+function updateProgressUI() {
+  const total = getTotalDuration();
+  const pct = Math.min(100, (playbackSeconds / total) * 100);
+  progressBarFill.style.width = `${pct}%`;
+  timeCurrent.textContent = formatTime(playbackSeconds);
+
+  let accumulated = 0;
+  for (let i = 0; i < scenes.length; i++) {
+    const sceneDur = scenes[i].duration;
+    if (playbackSeconds >= accumulated && playbackSeconds < accumulated + sceneDur) {
+      if (currentSceneIndex !== i) {
+        loadScene(i, true);
+        if (isPlaying) speakCurrentScene();
+      }
+      const sceneProgress = (playbackSeconds - accumulated) / sceneDur;
+      updateKineticHighlight(sceneProgress);
+      break;
+    }
+    accumulated += sceneDur;
+  }
+}
+
+/** Playback Engine */
+function play() {
+  if (isPlaying) return;
+  isPlaying = true;
+  videoViewport.classList.add("playing");
+  playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+
+  if (playbackSeconds >= getTotalDuration()) {
+    playbackSeconds = 0;
+    loadScene(0, true);
+  }
+
+  speakCurrentScene();
+
+  playbackTimer = setInterval(() => {
+    playbackSeconds += 0.1;
+    if (playbackSeconds >= getTotalDuration()) {
+      pause();
+      playbackSeconds = getTotalDuration();
+      updateProgressUI();
+      return;
+    }
+    updateProgressUI();
+  }, 100);
+}
+
+function pause() {
+  isPlaying = false;
+  videoViewport.classList.remove("playing");
+  playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+  clearInterval(playbackTimer);
+  updateKineticHighlight(-1);
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function speakCurrentScene() {
+  if (isMuted || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const current = scenes[currentSceneIndex];
+  if (!current) return;
+
+  const utter = new SpeechSynthesisUtterance(current.text);
+  utter.rate = 1.05;
+  utter.lang = isArabic ? "ar-SA" : "en-US";
+  window.speechSynthesis.speak(utter);
+}
+
+/**
+ * Text processor: parses topic / script and dynamically assigns
+ * precise contextual images and motion choreography.
+ */
+function processScriptToScenes(rawScript) {
+  const cleaned = cleanScriptChunk(rawScript);
+  if (!cleaned) return;
+
+  const rawChunks = cleaned.split(/\n+/).filter(c => c.trim().length > 0);
+  let finalChunks = [];
+
+  if (rawChunks.length === 1) {
+    const sentences = rawChunks[0].split(/[.،؛!?]+/).map(s => s.trim()).filter(s => s.length > 5);
+    if (sentences.length >= 2) {
+      finalChunks = sentences.slice(0, 3);
+    } else {
+      finalChunks = [rawChunks[0]];
+    }
+  } else {
+    finalChunks = rawChunks.slice(0, 4);
+  }
+
+  const newScenes = finalChunks.map((chunk, idx) => {
+    const text = cleanScriptChunk(chunk);
+    const words = text.split(/\s+/).length;
+    const dur = Math.max(4, Math.round(words / 2.2));
+    const visual = resolveVisual(text, idx);
+
+    let title = isArabic ? `المشهد ${idx + 1}` : `Scene ${idx + 1}`;
+    if (idx === 0) title = isArabic ? "المقدمة والافتتاحية" : "Opening Hook";
+    else if (idx === finalChunks.length - 1) title = isArabic ? "الخاتمة والدعوة للتفاعل" : "Call to Action";
+
+    return {
+      title,
+      text,
+      duration: dur,
+      imageUrl: visual.imageUrl,
+      visualTag: visual.tag,
+      motionClass: MOTION_VARIANTS[idx % MOTION_VARIANTS.length]
+    };
+  });
+
+  scenes = newScenes;
+  playbackSeconds = 0;
+  pause();
+  renderScenes();
+  loadScene(0, false);
+}
+
+function updateWordCount() {
+  const text = scriptInput.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  const estSec = Math.round(words / 2.2);
+  wordCountLabel.textContent = isArabic
+    ? `${words} كلمة • مدة تقديرية ${estSec} ثانية`
+    : `${words} words • ~${estSec}s duration`;
+}
+
+function generateDynamicScript(topic) {
+  const clean = topic.replace("فيديو عن:", "").trim();
+  if (clean.includes("تفاح") || clean.includes("apple")) {
+    return isArabic
+      ? `يعتبر التفاح الطازج من أشهى الفواكه وأكثرها غنى بمضادات الأكسدة والفيتامينات الطبيعية.\nتناول تفاحة يومياً يعزز صحة القلب والشرايين ويمنح جسمك حيوية ونضارة مستمرة.\nاجعل ثمار التفاح اللذيذة خيارك الأول لوجبة خفيفة مغذية وصحية كل يوم!`
+      : `Fresh crisp apples are among the most delicious fruits packed with natural antioxidants.\nEating an apple daily boosts vitality, strengthens wellness, and energizes your routine.\nMake fresh apples your premier wholesome healthy snack every single day!`;
+  } else if (clean.includes("عدس") || clean.includes("lentil") || clean.includes("شورب")) {
+    return isArabic
+      ? `تعتبر شوربة العدس الدافئة من أروع الأغذية الطبيعية الغنية بالبروتين النباتي والألياف.\nتمنحك الحبوب والبقوليات طاقة مستدامة وتقوي المناعة وتدعم صحة القلب والشرايين.\nاجعل طبق الحساء الصحي جزءاً من وجباتك اليومية لتحافظ على نشاطك وصحتك!`
+      : `Warm nutrient-dense lentil soup is nature's finest powerhouse of plant protein and fiber.\nWholesome legumes deliver sustained energy, supporting cardiovascular vitality and endurance.\nMake a steaming bowl of wholesome soup your daily nutritious ritual!`;
+  } else if (clean.includes("رياض") || clean.includes("sport") || clean.includes("ملعب")) {
+    return isArabic
+      ? `الرياضة والتمارين في صالات الجيم وملاعب الرياضة تبني قوة الجسد وصلابة العزيمة.\nالنشاط البدني المنتظم يحفز الطاقة الإيجابية ويصقل لياقتك البدنية إلى مستويات قياسية.\nابدأ تمرينك اليوم وتحدى قدراتك لتصل إلى أفضل نسخة من نفسك في كل تمرين!`
+      : `Dynamic sports and athletic gym training forge physical strength and mental resilience.\nConsistent workouts elevate your energy levels, endurance, and overall conditioning.\nHit the field or gym today and challenge your limits to achieve peak performance!`;
+  }
+
+  if (isArabic) {
+    return `اكتشف كل ما تحتاج معرفته عن ${clean} في هذا المقطع السريع والمميز.\nيتميز ${clean} بفوائد استثنائية وقيمة فريدة تجعله محط اهتمام وإلهام حقيقي للجميع.\nشاركنا تجربتك ورأيك حول ${clean} في التعليقات وتابعنا للمزيد من المحتوى المميز!`;
+  } else {
+    return `Discover everything you need to know about ${clean} in this quick breakdown.\nExploring ${clean} offers incredible benefits and insights that inspire and elevate everyday life.\nShare your thoughts on ${clean} below and subscribe for more insightful updates!`;
+  }
+}
+
+/** Events */
+function bindEvents() {
+  btnPlayPause.onclick = () => isPlaying ? pause() : play();
+
+  btnPrevScene.onclick = () => {
+    if (currentSceneIndex > 0) {
+      calculateTimeForScene(currentSceneIndex - 1);
+      loadScene(currentSceneIndex - 1, true);
+      if (isPlaying) speakCurrentScene();
+    }
+  };
+
+  btnNextScene.onclick = () => {
+    if (currentSceneIndex < scenes.length - 1) {
+      calculateTimeForScene(currentSceneIndex + 1);
+      loadScene(currentSceneIndex + 1, true);
+      if (isPlaying) speakCurrentScene();
+    }
+  };
+
+  btnMuteToggle.onclick = () => {
+    isMuted = !isMuted;
+    if (isMuted) {
+      soundIcon.innerHTML = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    } else {
+      soundIcon.innerHTML = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>`;
+      if (isPlaying) speakCurrentScene();
+    }
+  };
+
+  btnVertical.onclick = () => {
+    btnVertical.classList.add("active");
+    btnWidescreen.classList.remove("active");
+    videoViewport.classList.remove("widescreen");
+  };
+
+  btnWidescreen.onclick = () => {
+    btnWidescreen.classList.add("active");
+    btnVertical.classList.remove("active");
+    videoViewport.classList.add("widescreen");
+  };
+
+  progressBarWrap.onclick = (e) => {
+    const rect = progressBarWrap.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    playbackSeconds = Math.max(0, Math.min(getTotalDuration(), ratio * getTotalDuration()));
+    updateProgressUI();
+    if (isPlaying) speakCurrentScene();
+  };
+
+  document.querySelectorAll(".preset-chip").forEach(chip => {
+    chip.onclick = () => {
+      const topic = chip.getAttribute("data-topic");
+      const generated = generateDynamicScript(topic);
+      scriptInput.value = generated;
+      updateWordCount();
+      processScriptToScenes(generated);
+    };
+  });
+
+  scriptInput.oninput = updateWordCount;
+
+  btnClearScript.onclick = () => {
+    scriptInput.value = "";
+    updateWordCount();
+  };
+
+  btnToggleDir.onclick = () => {
+    const dir = scriptInput.style.direction === "ltr" ? "rtl" : "ltr";
+    scriptInput.style.direction = dir;
+    scriptInput.style.textAlign = dir === "rtl" ? "right" : "left";
+  };
+
+  btnCreateVideo.onclick = () => {
+    const text = scriptInput.value.trim();
+    if (!text) {
+      alert(isArabic ? "يرجى كتابة نص أولاً!" : "Please write or select a script first!");
+      return;
+    }
+    processScriptToScenes(text);
+  };
+
+  btnAiGenerate.onclick = async () => {
+    const currentText = scriptInput.value.trim();
+    const topic = currentText || (isArabic ? "شوربة العدس الصحية" : "Healthy Lentil Soup");
+    btnAiGenerate.style.opacity = "0.6";
+    btnAiGenerate.innerHTML = `<span>⏳</span> <span>جاري التوليد...</span>`;
+
+    setTimeout(() => {
+      const generated = generateDynamicScript(topic);
+      scriptInput.value = generated;
+      updateWordCount();
+      processScriptToScenes(generated);
+      btnAiGenerate.style.opacity = "1";
+      btnAiGenerate.innerHTML = `<span>✨</span> <span id="btnAiText">${isArabic ? "توليد بالذكاء الاصطناعي" : "Generate with AI"}</span>`;
+    }, 450);
+  };
+
+  btnLangToggle.onclick = () => {
+    isArabic = !isArabic;
+    document.documentElement.lang = isArabic ? "ar" : "en";
+    document.documentElement.dir = isArabic ? "rtl" : "ltr";
+    document.getElementById("langLabel").textContent = isArabic ? "English" : "العربية";
+    document.getElementById("appTitle").textContent = isArabic ? "صانع الفيديو الذكي" : "AI Video Creator";
+    document.getElementById("appSubtitle").textContent = isArabic ? "AI Video Creator • المحتوى المنسق" : "Context-Aware Video Studio";
+    document.getElementById("btnAiText").textContent = isArabic ? "توليد بالذكاء الاصطناعي" : "Generate with AI";
+    document.getElementById("btnCreateText").textContent = isArabic ? "تحديث الفيديو والمشاهد" : "Create Video Scenes";
+    document.getElementById("studioTitle").textContent = isArabic ? "محرر النص والمشاهد" : "Script & Storyboard Studio";
+    document.getElementById("ribbonHeaderTitle").textContent = isArabic ? "مشاهد الفيديو المتطابقة:" : "Matched Video Scenes:";
+    const installBtnTxt = document.getElementById("installBtnText");
+    if (installBtnTxt) installBtnTxt.textContent = isArabic ? "تثبيت التطبيق" : "Install App";
+    const downloadBtnTxt = document.getElementById("downloadBtnText");
+    if (downloadBtnTxt) downloadBtnTxt.textContent = isArabic ? "تحميل الحزمة" : "Download App";
+    const instModalTitle = document.getElementById("installModalTitle");
+    if (instModalTitle) instModalTitle.textContent = isArabic ? "تثبيت التطبيق على هاتفك" : "Install App to Home Screen";
+    const dlModalTitle = document.getElementById("dlModalTitle");
+    if (dlModalTitle) dlModalTitle.textContent = isArabic ? "تحميل التطبيق مباشرة لجهازك" : "Download App Directly to Device";
+    const dlModalSub = document.getElementById("dlModalSubtitle");
+    if (dlModalSub) dlModalSub.textContent = isArabic ? "تنزيل مباشر بنقرة واحدة بدون الاعتماد على نافذة المعاينة" : "One-click direct download without relying on the preview window";
+    const dlSingleTitle = document.getElementById("dlSingleHtmlTitle");
+    if (dlSingleTitle) dlSingleTitle.textContent = isArabic ? "حزمة ملف HTML الموحد المستقل" : "Standalone Single-File HTML Package";
+    const dlSingleDesc = document.getElementById("dlSingleHtmlDesc");
+    if (dlSingleDesc) dlSingleDesc.textContent = isArabic ? "ملف واحد مجمع (66 KB) يعمل في أي متصفح هاتف أو كمبيوتر بدون إنترنت." : "Single compiled file (66 KB) running in any mobile or desktop browser offline.";
+    const dlSingleBtnTxt = document.getElementById("dlSingleHtmlBtnText");
+    if (dlSingleBtnTxt) dlSingleBtnTxt.textContent = isArabic ? "تحميل HTML" : "Download HTML";
+    const dlZipTitle = document.getElementById("dlZipTitle");
+    if (dlZipTitle) dlZipTitle.textContent = isArabic ? "حزمة تطبيق الويب الكاملة (ZIP)" : "Full Web App Archive (ZIP)";
+    const dlZipDesc = document.getElementById("dlZipDesc");
+    if (dlZipDesc) dlZipDesc.textContent = isArabic ? "أرشيف مضغوط (27 KB) يضم كود المصدر، أيقونات PWA وتطبيق الويب التقدمي كاملاً." : "Compressed archive (27 KB) with offline PWA, icons, manifest, and service worker.";
+    const dlZipBtnTxt = document.getElementById("dlZipBtnText");
+    if (dlZipBtnTxt) dlZipBtnTxt.textContent = isArabic ? "تحميل ZIP" : "Download ZIP";
+    const dlApkTitle = document.getElementById("dlApkTitle");
+    if (dlApkTitle) dlApkTitle.textContent = isArabic ? "تطبيق أندرويد المستقل (APK)" : "Native Android Application (APK)";
+    const dlApkDesc = document.getElementById("dlApkDesc");
+    if (dlApkDesc) dlApkDesc.textContent = isArabic ? "ملف APK أصلي مترجم (26 MB) جاهز للتثبيت والاستخدام المباشر على الهاتف." : "Compiled native APK (26 MB) ready for direct install on Android devices.";
+    const dlApkBtnTxt = document.getElementById("dlApkBtnText");
+    if (dlApkBtnTxt) dlApkBtnTxt.textContent = isArabic ? "تحميل APK" : "Download APK";
+    const tipTitleEl = document.getElementById("tipTitle");
+    if (tipTitleEl) tipTitleEl.textContent = isArabic ? "تثبيت فوري على الشاشة الرئيسية:" : "One-Tap Home Screen Install:";
+    const tipDescEl = document.getElementById("tipDesc");
+    if (tipDescEl) tipDescEl.textContent = isArabic ? "انقر على زر 'تثبيت الآن' لإضافة التطبيق كبرنامج مستقل يعمل بسلاسة وسرعة فائقة." : "Tap 'Install Now' to add the app directly to your home screen with smooth standalone performance.";
+    const btnConfirmEl = document.getElementById("btnConfirmNativeText");
+    if (btnConfirmEl) btnConfirmEl.textContent = isArabic ? "تثبيت الآن" : "Install Now";
+    document.getElementById("statusAlertText").innerHTML = isArabic
+      ? `<strong>محرك الفيديو الحركي نشط:</strong> تأثيرات حركة سينمائية Ken Burns، وترجمات نصية مضيئة متزامنة كلمة بكلمة، وصور عالية الدقة مطابقة بدقة لموضوع النص!`
+      : `<strong>Dynamic Video Engine Active:</strong> Cinematic Ken Burns motion, glowing word-by-word kinetic captions, and high-precision contextual visual matching!`;
+    updateWordCount();
+    loadScene(currentSceneIndex, false);
+  };
+
+  btnApiKey.onclick = () => {
+    apiKeyInput.value = userApiKey;
+    apiKeyModal.classList.add("open");
+  };
+  btnCloseModal.onclick = () => apiKeyModal.classList.remove("open");
+  btnSaveApiKey.onclick = () => {
+    userApiKey = apiKeyInput.value.trim();
+    localStorage.setItem("gemini_api_key", userApiKey);
+    apiKeyModal.classList.remove("open");
+  };
+
+  // --- Progressive Web App (PWA) Setup & Install Prompt Engine ---
+  let deferredPrompt = null;
+  const btnInstallApp = document.getElementById("btnInstallApp");
+  const installModal = document.getElementById("installModal");
+  const btnCloseInstallModal = document.getElementById("btnCloseInstallModal");
+  const btnConfirmNativeInstall = document.getElementById("btnConfirmNativeInstall");
+  const iosInstallGuide = document.getElementById("iosInstallGuide");
+  const standardInstallTip = document.getElementById("standardInstallTip");
+
+  // Register Service Worker for offline capability & PWA compliance
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('PWA ServiceWorker registered with scope:', reg.scope))
+        .catch((err) => console.warn('PWA ServiceWorker registration failed:', err));
+    });
+  }
+
+  // Intercept beforeinstallprompt for native browser install flow
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btnInstallApp) {
+      btnInstallApp.style.display = 'inline-flex';
+      btnInstallApp.classList.add('pulse-glow');
+    }
+    console.log('Native beforeinstallprompt event captured and ready.');
+  });
+
+  // Handle successful installation
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    if (btnInstallApp) {
+      btnInstallApp.classList.remove('pulse-glow');
+      btnInstallApp.innerHTML = `<span>✓</span> <span>${isArabic ? 'تم التثبيت' : 'Installed'}</span>`;
+      btnInstallApp.style.background = 'rgba(16, 185, 129, 0.2)';
+      btnInstallApp.style.borderColor = '#10B981';
+      btnInstallApp.style.color = '#6EE7B7';
+    }
+    if (installModal) installModal.classList.remove('open');
+  });
+
+  function showInstallModal() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      if (iosInstallGuide) iosInstallGuide.style.display = 'flex';
+      if (standardInstallTip) standardInstallTip.style.display = 'none';
+      if (btnConfirmNativeInstall) btnConfirmNativeInstall.style.display = 'none';
+    } else {
+      if (iosInstallGuide) iosInstallGuide.style.display = 'none';
+      if (standardInstallTip) standardInstallTip.style.display = 'flex';
+      if (btnConfirmNativeInstall) btnConfirmNativeInstall.style.display = 'inline-flex';
+    }
+    installModal.classList.add('open');
+  }
+
+  if (btnInstallApp) {
+    btnInstallApp.onclick = async () => {
+      // If native deferred prompt is available (Chrome / Edge / Android)
+      if (deferredPrompt) {
+        try {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            btnInstallApp.style.display = 'none';
+          }
+          deferredPrompt = null;
+        } catch (err) {
+          console.warn('Install prompt trigger error:', err);
+          showInstallModal();
+        }
+      } else {
+        // Check if app is already running standalone
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        if (isStandalone) {
+          alert(isArabic ? 'التطبيق مثبت بالفعل على جهازك ويعمل بنمط مستقل!' : 'The app is already installed and running in standalone mode!');
+          return;
+        }
+        showInstallModal();
+      }
+    };
+  }
+
+  if (btnCloseInstallModal) {
+    btnCloseInstallModal.onclick = () => installModal.classList.remove('open');
+  }
+
+  // --- Direct Download Modal Handlers ---
+  const btnDownloadPkg = document.getElementById("btnDownloadPkg");
+  const downloadModal = document.getElementById("downloadModal");
+  const btnCloseDownloadModal = document.getElementById("btnCloseDownloadModal");
+
+  if (btnDownloadPkg && downloadModal) {
+    btnDownloadPkg.onclick = () => {
+      downloadModal.classList.add("open");
+    };
+  }
+
+  if (btnCloseDownloadModal && downloadModal) {
+    btnCloseDownloadModal.onclick = () => {
+      downloadModal.classList.remove("open");
+    };
+  }
+
+  if (btnConfirmNativeInstall) {
+    btnConfirmNativeInstall.onclick = async () => {
+      if (deferredPrompt) {
+        try {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            if (btnInstallApp) btnInstallApp.style.display = 'none';
+          }
+          deferredPrompt = null;
+          installModal.classList.remove('open');
+        } catch (e) {
+          console.warn(e);
+        }
+      } else {
+        alert(isArabic ? 'من قائمة المتصفح (⋮)، اضغط على "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية"' : 'Open browser menu (⋮) and tap "Install app" or "Add to Home screen"');
+        installModal.classList.remove('open');
+      }
+    };
+  }
+}
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
